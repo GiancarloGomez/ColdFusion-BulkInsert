@@ -2,7 +2,7 @@
 A CFC that allows you to use [MSSQL's BULK INSERT](https://docs.microsoft.com/en-us/sql/t-sql/statements/bulk-insert-transact-sql)
 by simply following simple naming conventions and an existing [XML Format File](https://docs.microsoft.com/en-us/sql/relational-databases/import-export/use-a-format-file-to-bulk-import-data-sql-server) which can be created manually or by using the [bcp Utility](https://docs.microsoft.com/en-us/sql/tools/bcp-utility)
 
-A special thanks to __Gert Franz__ ([gert_railo](https://twitter.com/gert_railo),[gert_rasia](https://twitter.com/gert_rasia)) as this CFC was inspired by his __"How to make CFML script fast"__ session at
+A special thanks to __Gert Franz__ ([www.rasia.ch](www.rasia.ch)) as this CFC was inspired by his __"How to make CFML script fast"__ session at
 [Into The Box 2017](https://www.intothebox.org/#sessions). He also went above and beyond to review initial parts of the code base
 and help further optimize and teach me some additional things. If you want help optimizing your code, he is the man to call!
 
