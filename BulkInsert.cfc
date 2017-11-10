@@ -26,6 +26,7 @@ component output="false" accessors="true"
 	* @debugOnly A boolean value to only debug (skips data pull and insert)
 	* @doInsert A boolean value to run the final BULK INSERT statement. Set to false to only generate the file
 	* @total A numeric value ot total records to process, this is handled internally but if a recordcount is requested outside of this or want to force a total you can pass it in
+	* @whereClause A custom where clause to pass to build SQL
 	*/
 	public struct function process(
 		required string formatPath,
@@ -40,7 +41,8 @@ component output="false" accessors="true"
 		boolean debug 			= false,
 		boolean debugOnly 		= false,
 		boolean doInsert 		= true,
-		numeric total
+		numeric total,
+		string whereClause 		= ""
 	){
 		var rtn 			= {"debugger":[],"sqlString":"","total":0,"fields":[],"fieldsSQL":[]};
 		var _timer 			= arguments.debug ? getTickCount() : 0;
@@ -61,7 +63,16 @@ component output="false" accessors="true"
 		var theWriteFile 	= "";
 
 		// create the sql string
-		createSQL(rtn,xmlColumns,xmlFields,arguments.table,arguments.orderBy,arguments.replaceSQL,arguments.singleFieldSQL);
+		createSQL(
+			rtn 			: rtn,
+			xmlColumns 		: xmlColumns,
+			xmlFields 		: xmlFields,
+			table 			: arguments.table,
+			orderby 		: arguments.orderBy,
+			replaceSQL 		: arguments.replaceSQL,
+			singleFieldSQL 	: arguments.singleFieldSQL,
+			whereClause 	: arguments.whereClause
+		);
 
 		// debug
 		_timer = doDebug("SETUP, XML AND SQL",rtn,arguments.debug,_timer);
@@ -72,7 +83,7 @@ component output="false" accessors="true"
 
 			// get our initial data count so we can handle in paged chunks
 			if (!structKeyExists(arguments,"total"))
-				rtn.total = queryExecute("SELECT COUNT(1) AS total FROM #arguments.table# WITH(NOLOCK)",{},{datasource:arguments.datasource}).total;
+				rtn.total = queryExecute("SELECT COUNT(1) AS total FROM #arguments.table# WITH(NOLOCK) #arguments.whereClause#",{},{datasource:arguments.datasource}).total;
 			else
 				rtn.total = arguments.total;
 
@@ -178,7 +189,8 @@ component output="false" accessors="true"
 		required string table,
 		required string orderby,
 		boolean replaceSQL 		= true,
-		boolean singleFieldSQL 	= true
+		boolean singleFieldSQL 	= true,
+		string whereClause 		= ""
 	){
 		var field 		= "";
 		var sqlArray 	= [];
@@ -202,6 +214,7 @@ component output="false" accessors="true"
 				arguments.rtn.sqlString = 	"SELECT" & createNewLine() &
 											arrayToList(arguments.rtn.fieldsSQL,"," & createNewLine()) & createNewLine() &
 											"FROM #arguments.table# WITH(NOLOCK)" & createNewLine() &
+											( len(arguments.whereClause) ? arguments.whereClause & createNewLine() : "" ) &
 											"ORDER BY #arguments.orderby#" & createNewLine() &
 											"OFFSET :page ROWS FETCH NEXT :pagesize ROWS ONLY";
 			}
